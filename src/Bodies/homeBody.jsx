@@ -1,96 +1,88 @@
-import "../assets/styles/appContainer.css";
+import '../assets/styles/appContainer.css';
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import axios from 'axios';
+import database from '../database';
+import { onValue, ref } from 'firebase/database';
 
 const HomeBody = () => {
-  const [data1, setData1] = useState({});
-  const [data2, setData2] = useState({});
-  const [data3, setData3] = useState({});
-
-  const [prevData, setPrevData] = useState({});
-
+  const espDataRef = ref(database, '/test');
+  const [temperature, setTemperature] = useState('--');
+  const [pressure, setPressure] = useState('--');
+  const [humidity, setHumidity] = useState('--');
 
   useEffect(() => {
-    axios.get('URL_DEL_BACKEND/data1')
-      .then(response => {
-        setPrevData(data1);
-        setData1(response.data);
-      })
-      .catch(error => console.log(error));
+    onValue(espDataRef, (snapshot) => {
+      snapshot.forEach(childSnapshot => {
+        const keyName = childSnapshot.key;
+        const data = childSnapshot.val();
 
-    axios.get('URL_DEL_BACKEND/data2')
-      .then(response => {
-        setPrevData(data2);
-        setData2(response.data);
-      })
-      .catch(error => console.log(error));
+        console.log(`${keyName}: ${data}`);
+        switch (keyName) {
+          case 'temperature':
+            setTemperature(data);
+            break;
+          case 'humidity':
+            setHumidity(data);
+            break;
 
-    axios.get('URL_DEL_BACKEND/data3')
-      .then(response => {
-        setPrevData(data3);
-        setData3(response.data);
-      })
-      .catch(error => console.log(error));
-  }, []);
+          case 'pressure':
+            setPressure(data);
+            break
 
+          default:
+            break;
+        }
+      });
+    });
+  }, [humidity, pressure, temperature]);
 
-  const getHeadingColor = (prevValue, currValue) => {
-    const diff = Math.abs(currValue - prevValue);
-    if (diff > 50) {
-      return 'red';
-    } else if (diff > 25) {
-      return 'orange';
-    } else {
-      return 'white';
-    }
-  };
-
-
-  /*
-    useEffect(() => {
-      axios.get('URL_DEL_BACKEND/data1')
-        .then(response => setData1(response.data))
-        .catch(error => console.log(error));
-  
-      axios.get('URL_DEL_BACKEND/data2')
-        .then(response => setData2(response.data))
-        .catch(error => console.log(error));
-  
-      axios.get('URL_DEL_BACKEND/data3')
-        .then(response => setData3(response.data))
-        .catch(error => console.log(error));
-    }, []);
-  */
   return (
-  <body>
-       <div className="container" style={{marginTop : "4rem"}}>
-      <div className="row" style={{gap : "1rem", marginLeft : "1.5em"}}>
-        <div className="col-md-4" style={{background : "#111f0d", textAlign : "center", color : "white", width : "25rem", borderRadius : "1em"}}>
-          <h2>Humedad</h2>
-          <div className="col-md-4">
-            <h2 style={{ color: getHeadingColor(prevData.title, data1.title) }}>{data1.title}</h2>
-            <p>{data1.description}</p>
+    <div>
+      <div className='container' style={{ marginTop: '4rem' }}>
+        <div className='row' style={{ gap: '1rem', marginLeft: '1.5em' }}>
+          <div
+            className='col-md-4 d-flex flex-column align-items-center py-2'
+            style={{
+              background: 'rgba(0,0,0,.4)',
+              textAlign: 'center',
+              color: 'white',
+              width: '25rem',
+              borderRadius: '1em',
+            }}
+          >
+            <h2>Humedad</h2>
+            <h2>{humidity}%</h2>
           </div>
-        </div>
-        <div className="col-md-4"style={{background : "#111f0d", textAlign : "center", color : "white", width : "25rem", borderRadius : "1em"}} >
-          <h2>Temperatura</h2>
-          <div className="col-md-4">
-            <h2 style={{ color: getHeadingColor(prevData.title, data2.title) }}>{data2.title}</h2>
-            <p>{data2.description}</p>
+          <div
+            className='col-md-4 d-flex flex-column align-items-center py-2'
+            style={{
+              background: 'rgba(0,0,0,.4)',
+              textAlign: 'center',
+              color: 'white',
+              width: '25rem',
+              borderRadius: '1em',
+            }}
+          >
+            <h2>Temperatura</h2>
+            <h2>{temperature}°C</h2>
           </div>
-        </div>
-        <div className="col-md-4" style={{background : "#111f0d", textAlign : "center", color : "white", width : "25rem" , borderRadius : "1em"}}>
-          <h2>Presión</h2>
-          <div className="col-md-4">
-            <h2 style={{ color: getHeadingColor(prevData.title, data3.title) }}>{data3.title}</h2>
-            <p>{data3.description}</p>
+          <div
+            className='col-md-4 d-flex flex-column align-items-center py-2'
+            style={{
+              background: 'rgba(0,0,0,.4)',
+              textAlign: 'center',
+              color: 'white',
+              width: '25rem',
+              borderRadius: '1em',
+            }}
+          >
+            <h2>Presión</h2>
+            <h2>{Number(pressure * 0.00750062).toFixed(2)} mmHg</h2>
+            <h2>{Number(pressure / 101325).toFixed(2)} atm</h2>
           </div>
         </div>
       </div>
     </div>
-  </body>
-   
   );
 };
 

@@ -1,17 +1,13 @@
-
-import Header from "../components/HeaderHome";
-import HomeBody from "../Bodies/homeBody";
+import Header from '../components/HeaderHome';
+import HomeBody from '../Bodies/homeBody';
 
 function Home() {
-
-    return (
-        <>
-        
-            <Header></Header>
-            <HomeBody></HomeBody>
-         
-        </>
-    );
+  return (
+    <>
+      <Header />
+      <HomeBody />
+    </>
+  );
 }
 
 export default Home;
